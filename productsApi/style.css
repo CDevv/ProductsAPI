@@ -1,0 +1,21 @@
+.hide {
+    display: none;
+}
+
+#form-container {
+    background-color: darkgray;
+    padding: 10px;
+}
+
+#container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px
+}
+
+.product {
+    background-color: dodgerblue;
+    text-align: center;
+    width: 50%;
+}
