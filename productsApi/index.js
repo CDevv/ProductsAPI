@@ -1,5 +1,7 @@
 let children = []
 let formHidden = true
+let editFormContainer = null
+let chosenProduct = 0
 
 function clearProductsDOM()
 {
@@ -43,6 +45,11 @@ function addProductDOM(product)
     delButton.addEventListener('click', () => deleteProduct(product.id))
     item.appendChild(delButton)
 
+    const editButton = document.createElement('button')
+    editButton.innerHTML = "Edit"
+    editButton.addEventListener('click', () => showProductEditForm(product.id))
+    item.appendChild(editButton)
+
     children.push(item)
 }
 
@@ -80,9 +87,50 @@ async function deleteProduct(id)
     container.removeChild(productDOM)
 }
 
+function showProductEditForm(id)
+{
+    chosenProduct = id
+    const product = document.getElementById(`item-${id}`)
+    
+    if (editFormContainer.className === '') {
+        editFormContainer.className = 'hide'
+    }
+    else {
+        editFormContainer.className = ''
+    }
+
+    const formParent = editFormContainer.parentNode
+    formParent.removeChild(editFormContainer)
+
+    product.appendChild(editFormContainer)
+}
+
+async function editProduct(ev, id, name, price) 
+{
+    ev.preventDefault()
+
+    await fetch(`https://localhost:7177/api/Products/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id, name, price
+        })
+    }).catch((err) => console.log(err))
+
+    editFormContainer.className = 'hide'
+
+    clearProductsDOM()
+    loadData()
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const formButton = document.getElementById('submit-form-btn')
     const form = document.getElementById('submit-form')
+    editFormContainer = document.getElementById('form-edit')
+    const editForm = document.getElementById('submit-form-edit')
 
     formButton.addEventListener('click', () => {
         formHidden = !formHidden
@@ -99,6 +147,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nameField = document.querySelector('#submit-form input[name="name"]')
         const priceField = document.querySelector('#submit-form input[name="price"]')
         addProduct(ev, nameField.value, priceField.value)
+    })
+
+    editForm.addEventListener('submit', (ev) => {
+        const nameField = document.querySelector('#submit-form-edit input[name="name"]')
+        const priceField = document.querySelector('#submit-form-edit input[name="price"]')
+        editProduct(ev, chosenProduct, nameField.value, priceField.value)
     })
     
     loadData()
